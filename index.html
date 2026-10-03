@@ -67,6 +67,20 @@ code{background:rgba(0,0,0,.12);padding:1px 7px;font-size:.92em}
 .pine .tag{display:inline-block;background:#ffd23f;color:#1c2a1d;border:3px solid var(--line);font-family:"Press Start 2P",monospace;font-size:11px;padding:8px 10px}
 .btn.big{background:#ffd23f;color:#1c2a1d;font-size:13px;padding:18px 22px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.25),inset 4px 4px 0 rgba(255,255,255,.5)}
 @media (max-width:560px){.btn.big{display:block;text-align:center}}
+.sug{background:var(--panel);border:3px solid var(--line);padding:22px;display:grid;gap:14px}
+.sug[hidden]{display:none}
+.topsug{margin:22px 0 0}
+.sug label{font-weight:800;display:grid;gap:6px}
+.sug input,.sug textarea{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--line);padding:12px;width:100%}
+.sug textarea{min-height:130px;resize:vertical}
+.sug input:focus-visible,.sug textarea:focus-visible{outline:3px solid #ffd23f;outline-offset:2px}
+.sug .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.sug button{justify-self:start}
+.sug button:disabled{opacity:.6;cursor:wait}
+.sug .res{margin:0;min-height:1.4em;font-weight:800}
+.sug .res.ok{color:var(--grass-d)}
+.sug .res.err{color:#c0392b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sug .res.ok{color:#8be04e}}
 footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--grass-d);color:#fff;border:3px solid var(--line);padding:12px 16px;font-family:"Press Start 2P",monospace;font-size:11px;transition:transform .25s}
 .toast.on{transform:translate(-50%,0)}
@@ -99,6 +113,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
       </div>
       <button class="btn" id="copy" type="button">Copiar IP</button>
     </div>
+    <p class="topsug"><button class="btn dirt" id="sugOpenTop" type="button">Enviar sugerencia</button></p>
   </header>
 
   <section>
@@ -146,6 +161,22 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     </ul>
   </section>
 
+  <section id="sugerencias">
+    <h2>Sugerencias</h2>
+    <button class="btn dirt" id="sugToggle" type="button" aria-expanded="false" aria-controls="sugForm">Abrir sugerencias</button>
+    <form class="sug" id="sugForm" novalidate hidden style="margin-top:18px">
+      <label>Tu nombre o usuario de Minecraft (opcional)
+        <input type="text" name="nombre" maxlength="60" autocomplete="nickname">
+      </label>
+      <label>Tu sugerencia
+        <textarea name="mensaje" maxlength="1500" required placeholder="Cuéntanos qué mods, cambios o ideas te gustaría ver en CPland"></textarea>
+      </label>
+      <input class="hp" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn" type="submit" id="sugBtn">Enviar sugerencia</button>
+      <p class="res" id="sugRes" role="status"></p>
+    </form>
+  </section>
+
   <footer>CPland · By PapaCalvo.</footer>
 </div>
 <div class="toast" id="toast" role="status">IP copiada</div>
@@ -168,6 +199,47 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
       done(document.execCommand("copy"));
     }catch(e){done(false)}
   }
+})();
+(function(){
+  var form=document.getElementById("sugForm"),tg=document.getElementById("sugToggle"),top=document.getElementById("sugOpenTop");
+  function setOpen(o){
+    form.hidden=!o;
+    tg.textContent=o?"Cerrar sugerencias":"Abrir sugerencias";
+    tg.setAttribute("aria-expanded",o?"true":"false");
+  }
+  tg.addEventListener("click",function(){setOpen(form.hidden)});
+  top.addEventListener("click",function(){
+    setOpen(true);
+    document.getElementById("sugerencias").scrollIntoView({behavior:"smooth",block:"start"});
+    setTimeout(function(){try{form.mensaje.focus({preventScroll:true})}catch(e){}},500);
+  });
+})();
+(function(){
+  var f=document.getElementById("sugForm"),btn=document.getElementById("sugBtn"),res=document.getElementById("sugRes");
+  function say(t,c){res.textContent=t;res.className="res "+(c||"")}
+  f.addEventListener("submit",function(e){
+    e.preventDefault();
+    var msg=f.mensaje.value.trim();
+    if(msg.length<5){say("Escribe tu sugerencia antes de enviar.","err");return}
+    if(f._honey.value){return}
+    btn.disabled=true;say("Enviando...");
+    fetch("https://formsubmit.co/ajax/migued.tineo@gmail.com",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify({
+        nombre:f.nombre.value.trim()||"Anónimo",
+        mensaje:msg,
+        _subject:"Nueva sugerencia para CPland",
+        _template:"table"
+      })
+    }).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d}})})
+    .then(function(x){
+      if(x.ok&&String(x.d.success)!=="false"){f.reset();say("¡Gracias! Tu sugerencia fue enviada.","ok")}
+      else say("No se pudo enviar. Inténtalo más tarde.","err");
+    })
+    .catch(function(){say("No se pudo enviar. Revisa tu conexión.","err")})
+    .then(function(){btn.disabled=false});
+  });
 })();
 </script>
 </body>
