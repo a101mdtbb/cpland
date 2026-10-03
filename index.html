@@ -96,6 +96,27 @@ code{background:rgba(0,0,0,.12);padding:1px 7px;font-size:.92em}
 .plist.offl img{filter:grayscale(1)}
 .pnote{margin:0;color:var(--muted)}
 .pnote[hidden]{display:none}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+section{scroll-margin-top:76px}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;gap:6px;align-items:center;overflow-x:auto;background:var(--bg);border-bottom:3px solid var(--line);padding:10px 0;margin:0 -20px;padding-left:20px;padding-right:20px;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a,.nav .tbtn{flex:none;font-weight:800;font-size:15px;color:var(--ink);text-decoration:none;padding:9px 14px;border:3px solid transparent;background:none;cursor:pointer;font-family:inherit;min-height:44px;display:inline-flex;align-items:center}
+.nav a:hover,.nav .tbtn:hover{border-color:var(--line);background:var(--panel)}
+.nav .tbtn{margin-left:auto;border-color:var(--line)}
+.pill{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:15px;font-weight:800}
+.pill .dot{width:12px;height:12px;background:#888;flex:none}
+.pill.on .dot{background:#5dff5d}.pill.off .dot{background:#ff5555}
+.faq details{background:var(--panel);border:3px solid var(--line);margin-bottom:12px}
+.faq summary{cursor:pointer;font-weight:800;padding:14px 18px;list-style:none;display:flex;justify-content:space-between;gap:12px;min-height:48px;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-family:"Press Start 2P",monospace;font-size:14px;color:var(--grass)}
+.faq details[open] summary::after{content:"\2212"}
+.faq details p{margin:0;padding:0 18px 16px;color:var(--muted)}
+.up{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:48px;height:48px;padding:0;display:grid;place-items:center;font-size:16px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:15}
+.up.show{opacity:1;pointer-events:auto}
+.btn,.plist li,.facts li,li.step{transition:transform .12s,filter .12s}
+.facts li:hover,li.step:hover{transform:translateY(-2px)}
+.btn{min-height:44px}
 footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--grass-d);color:#fff;border:3px solid var(--line);padding:12px 16px;font-family:"Press Start 2P",monospace;font-size:11px;transition:transform .25s}
 .toast.on{transform:translate(-50%,0)}
@@ -108,6 +129,10 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
 </head>
 <body>
 <div class="wrap">
+  <nav class="nav" aria-label="Secciones">
+    <a href="#descargar">Descargar</a><a href="#como">Cómo entrar</a><a href="#estado">Estado</a><a href="#faq">Ayuda</a><a href="#sugerencias">Sugerencias</a>
+    <button type="button" class="tbtn" id="themeBtn" aria-label="Cambiar entre tema claro y oscuro">Tema</button>
+  </nav>
   <header>
     <h1>CPland</h1>
     <p class="sub">Servidor de Minecraft Java con mods en Fabric. Instala el pack, copia la IP y entra a jugar.</p>
@@ -125,13 +150,14 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
         <p class="name">CPland</p>
         <p class="ip" id="ip">rails-complies.tun.ply.gg</p>
         <p class="meta">Java 1.21.1 · Fabric · Requiere mods</p>
+        <p class="pill" id="pill" aria-live="polite"><span class="dot"></span><span id="pillTxt">Comprobando...</span></p>
       </div>
       <button class="btn" id="copy" type="button">Copiar IP</button>
     </div>
     <p class="topsug" style="margin:22px 0 0"><button class="btn" id="stOpenTop" type="button">Ver estado</button><button class="btn dirt" id="sugOpenTop" type="button">Enviar sugerencia</button></p>
   </header>
 
-  <section>
+  <section id="descargar">
     <div class="pine">
       <span class="tag">PineconeMC</span>
       <h2>Versión lista para PineconeMC</h2>
@@ -156,7 +182,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     </video>
   </section>
 
-  <section>
+  <section id="como">
     <h2>Cómo entrar</h2>
     <ol>
       <li class="step"><b>Instala Fabric 1.21.1</b><span>Descarga el instalador desde <a href="https://fabricmc.net/use/installer/" target="_blank" rel="noopener">fabricmc.net</a> y crea el perfil para Minecraft Java 1.21.1.</span></li>
@@ -191,6 +217,14 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     </ul>
   </section>
 
+    <section id="faq" class="faq">
+    <h2>Ayuda rápida</h2>
+    <details><summary>No puedo conectarme al servidor</summary><p>Comprueba que usas Minecraft Java 1.21.1 con Fabric, que tienes los mismos mods que el servidor y que escribiste bien la IP: <code>rails-complies.tun.ply.gg</code>. Revisa arriba si el servidor está en línea.</p></details>
+    <details><summary>¿Qué versión de Java necesito?</summary><p>Minecraft 1.21.1 necesita Java 21. Los launchers modernos, como Prism, lo instalan o lo piden automáticamente.</p></details>
+    <details><summary>Me dice que faltan o sobran mods</summary><p>Borra todo lo que haya en tu carpeta <code>mods</code> y vuelve a copiar los <code>.jar</code> del pack. Tienen que ser exactamente los mismos que usa el servidor.</p></details>
+    <details><summary>El juego se cierra al abrir</summary><p>Casi siempre es un mod que no corresponde a 1.21.1 o que falta. Reinstala el pack completo y abre el juego con el perfil de Fabric.</p></details>
+  </section>
+
   <section id="sugerencias">
     <h2>Sugerencias</h2>
     <button class="btn dirt" id="sugToggle" type="button" aria-expanded="false" aria-controls="sugForm">Abrir sugerencias</button>
@@ -208,6 +242,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
   </section>
 
   <footer>CPland · By PapaCalvo.</footer>
+<button class="btn up" id="up" type="button" aria-label="Volver arriba">&#9650;</button>
 </div>
 <div class="toast" id="toast" role="status">IP copiada</div>
 <script>
@@ -236,7 +271,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
   var line=document.getElementById("stLine"),txt=document.getElementById("stTxt");
   var ulOn=document.getElementById("stOn"),noteOn=document.getElementById("stOnNote");
   var ulOff=document.getElementById("stOff"),noteOff=document.getElementById("stOffNote");
-  var timer=null;
+  var timer=null,pill=document.getElementById("pill"),pillTxt=document.getElementById("pillTxt");
   function loadSeen(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){return {}}}
   function saveSeen(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
   function ago(ts){
@@ -258,6 +293,8 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     });
   }
   function render(online,n,m,names){
+    pill.className="pill "+(online?"on":"off");
+    pillTxt.textContent=online?"En línea · "+n+" / "+m+(n===1?" jugador":" jugadores"):"Servidor apagado";
     line.className="line "+(online?"on":"off");
     var seen=loadSeen(),now=Date.now();
     if(!online){
@@ -287,16 +324,16 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     get("https://api.mcstatus.io/v2/status/java/"+ip,function(p){return p.name_clean})
     .catch(function(){return get("https://api.mcsrvstat.us/3/"+ip,function(p){return p.name})})
     .then(function(r){render(r.online,r.n,r.m,r.names||[])})
-    .catch(function(){line.className="line";txt.textContent="No se pudo comprobar el estado. Abre la página en tu navegador."});
+    .catch(function(){line.className="line";pill.className="pill";pillTxt.textContent="Estado no disponible";txt.textContent="No se pudo comprobar el estado. Abre la página en tu navegador."});
   }
   function setOpen(o){
     panel.hidden=!o;
     tg.textContent=o?"Ocultar estado":"Ver estado y jugadores";
     tg.setAttribute("aria-expanded",o?"true":"false");
-    clearInterval(timer);
-    if(o){txt.textContent="Comprobando...";check();timer=setInterval(check,60000)}
+    if(o)check();
   }
   tg.addEventListener("click",function(){setOpen(panel.hidden)});
+  check();timer=setInterval(check,60000);
   topb.addEventListener("click",function(){
     if(panel.hidden)setOpen(true);
     document.getElementById("estado").scrollIntoView({behavior:"smooth",block:"start"});
@@ -341,6 +378,22 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     })
     .catch(function(){say("No se pudo enviar. Revisa tu conexión.","err")})
     .then(function(){btn.disabled=false});
+  });
+})();
+(function(){
+  var up=document.getElementById("up"),th=document.getElementById("themeBtn"),root=document.documentElement;
+  window.addEventListener("scroll",function(){up.classList.toggle("show",window.scrollY>500)},{passive:true});
+  up.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"})});
+  function dark(){var a=root.getAttribute("data-theme");return a?a==="dark":matchMedia("(prefers-color-scheme: dark)").matches}
+  try{var sv=localStorage.getItem("cpland_theme");if(sv)root.setAttribute("data-theme",sv)}catch(e){}
+  th.addEventListener("click",function(){
+    var n=dark()?"light":"dark";root.setAttribute("data-theme",n);
+    try{localStorage.setItem("cpland_theme",n)}catch(e){}
+  });
+  [["#estado","stOpenTop"],["#sugerencias","sugOpenTop"]].forEach(function(p){
+    document.querySelector('.nav a[href="'+p[0]+'"]').addEventListener("click",function(e){
+      e.preventDefault();document.getElementById(p[1]).click();
+    });
   });
 })();
 </script>
