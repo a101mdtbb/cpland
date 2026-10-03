@@ -223,7 +223,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     if(msg.length<5){say("Escribe tu sugerencia antes de enviar.","err");return}
     if(f._honey.value){return}
     btn.disabled=true;say("Enviando...");
-    fetch("https://formsubmit.co/ajax/migued.tineo@gmail.com",{
+    fetch("https://formsubmit.co/ajax/migueld.tineo@gmail.com",{
       method:"POST",
       headers:{"Content-Type":"application/json","Accept":"application/json"},
       body:JSON.stringify({
@@ -235,7 +235,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     }).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d}})})
     .then(function(x){
       if(x.ok&&String(x.d.success)!=="false"){f.reset();say("¡Gracias! Tu sugerencia fue enviada.","ok")}
-      else say("No se pudo enviar. Inténtalo más tarde.","err");
+      else say("No se pudo enviar: "+((x.d&&x.d.message)||"inténtalo más tarde")+"","err");
     })
     .catch(function(){say("No se pudo enviar. Revisa tu conexión.","err")})
     .then(function(){btn.disabled=false});
