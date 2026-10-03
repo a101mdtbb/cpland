@@ -60,17 +60,17 @@ code{background:rgba(0,0,0,.12);padding:1px 7px;font-size:.92em}
 .facts li{background:var(--panel);border:3px solid var(--line);padding:14px 16px}
 .facts small{display:block;color:var(--muted)}
 .facts strong{font-size:19px}
-.lead{margin:0 0 14px;color:var(--muted)}
-.cmd{display:flex;gap:12px;align-items:center;justify-content:space-between;background:var(--list);border:3px solid var(--line);padding:12px 14px;margin:0 0 18px}
-.cmd code{background:none;color:#5dff5d;padding:0;font-size:14px;word-break:break-all;flex:1;min-width:0}
-.cmd .btn{flex:none}
 .tuto{width:100%;display:block;border:4px solid var(--line);box-shadow:8px 8px 0 var(--grass-d);background:#000}
+.pine{background:var(--grass);color:#fff;border:4px solid var(--line);box-shadow:8px 8px 0 var(--grass-d);padding:28px 24px;position:relative}
+.pine h2{font-size:clamp(16px,4.6vw,24px);margin:12px 0 14px;text-shadow:3px 3px 0 rgba(0,0,0,.35)}
+.pine p{margin:0 0 22px;max-width:52ch;font-size:18px}
+.pine .tag{display:inline-block;background:#ffd23f;color:#1c2a1d;border:3px solid var(--line);font-family:"Press Start 2P",monospace;font-size:11px;padding:8px 10px}
+.btn.big{background:#ffd23f;color:#1c2a1d;font-size:13px;padding:18px 22px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.25),inset 4px 4px 0 rgba(255,255,255,.5)}
+@media (max-width:560px){.btn.big{display:block;text-align:center}}
 footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--grass-d);color:#fff;border:3px solid var(--line);padding:12px 16px;font-family:"Press Start 2P",monospace;font-size:11px;transition:transform .25s}
 .toast.on{transform:translate(-50%,0)}
 @media (max-width:560px){
-  .cmd{flex-direction:column;align-items:stretch}
-  .cmd .btn{text-align:center}
   .entry{flex-wrap:wrap}
   .entry .btn{width:100%;text-align:center}
 }
@@ -102,27 +102,19 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
   </header>
 
   <section>
-    <h2>Mods</h2>
-    <div class="mods">
-      <p>Necesitas los mismos mods que el servidor para poder conectarte.</p>
-      <a class="btn dirt" href="https://mega.nz/file/9vJV1KyA#S5QC-XTauqxJMhZypXob2-LuQy_7uP0m5xNlHx2h-NI" target="_blank" rel="noopener">Descargar mods</a>
+    <div class="pine">
+      <span class="tag">PineconeMC</span>
+      <h2>Versión lista para PineconeMC</h2>
+      <p>Descarga la versión de Minecraft para PineconeMC con todos los mods ya incluidos. No tienes que bajar los mods aparte.</p>
+      <a class="btn big" href="https://mega.nz/file/8vQHTR6J#49TvHHZ2S_00ODyMNkSfB2SldGbWaZeK8JFa3jPyV3s" target="_blank" rel="noopener">Descargar para PineconeMC</a>
     </div>
   </section>
 
   <section>
-    <h2>Instalación automatica en Linux (solo PineconeMC)</h2>
-    <p class="lead">Descarga el pack de mods en tu carpeta de Descargas y ejecuta este comando en la terminal. Los mods se instalan solos en ElyPrismLauncher (instancia <code>1.21.1</code>).</p>
-
-    <div class="cmd">
-      <code id="cmd1">curl -fsSL https://a101mdtbb.github.io/cpland/instalar-mods.sh | bash</code>
-      <button class="btn" type="button" data-copy="cmd1">Copiar</button>
-    </div>
-
-    <p class="lead">Para actualizar a una versión nueva y borrar los mods viejos:</p>
-
-    <div class="cmd">
-      <code id="cmd2">curl -fsSL https://a101mdtbb.github.io/cpland/instalar-mods.sh | bash -s -- --limpiar</code>
-      <button class="btn" type="button" data-copy="cmd2">Copiar</button>
+    <h2>Mods</h2>
+    <div class="mods">
+      <p>Si no usas PineconeMC, necesitas los mismos mods que el servidor para poder conectarte.</p>
+      <a class="btn dirt" href="https://mega.nz/file/9vJV1KyA#S5QC-XTauqxJMhZypXob2-LuQy_7uP0m5xNlHx2h-NI" target="_blank" rel="noopener">Descargar mods</a>
     </div>
   </section>
 
@@ -177,18 +169,6 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     }catch(e){done(false)}
   }
 })();
-document.querySelectorAll("[data-copy]").forEach(function(b){
-  b.addEventListener("click",function(){
-    var el=document.getElementById(b.dataset.copy),t=document.getElementById("toast");
-    function msg(ok){
-      t.textContent=ok?"Comando copiado":"Cópialo a mano";
-      t.classList.add("on");setTimeout(function(){t.classList.remove("on")},1800);
-    }
-    try{
-      navigator.clipboard.writeText(el.textContent).then(function(){msg(true)},function(){msg(false)});
-    }catch(e){msg(false)}
-  });
-});
 </script>
 </body>
 </html>
