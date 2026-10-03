@@ -102,6 +102,21 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
     </div>
   </section>
 
+<script>
+document.querySelectorAll("[data-copy]").forEach(function(b){
+  b.addEventListener("click",function(){
+    var el=document.getElementById(b.dataset.copy),t=document.getElementById("toast");
+    function msg(ok){
+      t.textContent=ok?"Comando copiado":"Cópialo a mano";
+      t.classList.add("on");setTimeout(function(){t.classList.remove("on")},1800);
+    }
+    try{
+      navigator.clipboard.writeText(el.textContent).then(function(){msg(true)},function(){msg(false)});
+    }catch(e){msg(false)}
+  });
+});
+</script>
+  
   <section>
     <h2>Video tutorial</h2>
     <video class="tuto" controls preload="metadata" playsinline>
