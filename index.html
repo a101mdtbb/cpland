@@ -69,7 +69,6 @@ code{background:rgba(0,0,0,.12);padding:1px 7px;font-size:.92em}
 @media (max-width:560px){.btn.big{display:block;text-align:center}}
 .sug{background:var(--panel);border:3px solid var(--line);padding:22px;display:grid;gap:14px}
 .sug[hidden]{display:none}
-.topsug{margin:22px 0 0}
 .sug label{font-weight:800;display:grid;gap:6px}
 .sug input,.sug textarea{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--line);padding:12px;width:100%}
 .sug textarea{min-height:130px;resize:vertical}
@@ -81,6 +80,22 @@ code{background:rgba(0,0,0,.12);padding:1px 7px;font-size:.92em}
 .sug .res.ok{color:var(--grass-d)}
 .sug .res.err{color:#c0392b}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sug .res.ok{color:#8be04e}}
+.topsug{display:flex;flex-wrap:wrap;gap:12px}
+.st{background:var(--panel);border:3px solid var(--line);padding:20px;display:grid;gap:14px}
+.st[hidden]{display:none}
+.st .line{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;margin:0}
+.st .dot{width:14px;height:14px;background:#888;flex:none}
+.st .on .dot,.st .line.on .dot{background:#3fbf3f}
+.st .line.off .dot{background:#e04848}
+.st h3{font-family:"Press Start 2P",monospace;font-weight:400;font-size:12px;margin:6px 0 0;line-height:1.5}
+.plist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.plist li{display:flex;align-items:center;gap:12px;background:var(--bg);border:3px solid var(--line);padding:10px 14px;font-weight:800;word-break:break-all}
+.plist li small{display:block;font-weight:400;color:var(--muted)}
+.plist img{width:32px;height:32px;image-rendering:pixelated;flex:none;background:var(--dirt)}
+.plist.offl li{opacity:.7}
+.plist.offl img{filter:grayscale(1)}
+.pnote{margin:0;color:var(--muted)}
+.pnote[hidden]{display:none}
 footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--grass-d);color:#fff;border:3px solid var(--line);padding:12px 16px;font-family:"Press Start 2P",monospace;font-size:11px;transition:transform .25s}
 .toast.on{transform:translate(-50%,0)}
@@ -113,7 +128,7 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
       </div>
       <button class="btn" id="copy" type="button">Copiar IP</button>
     </div>
-    <p class="topsug"><button class="btn dirt" id="sugOpenTop" type="button">Enviar sugerencia</button></p>
+    <p class="topsug" style="margin:22px 0 0"><button class="btn" id="stOpenTop" type="button">Ver estado</button><button class="btn dirt" id="sugOpenTop" type="button">Enviar sugerencia</button></p>
   </header>
 
   <section>
@@ -149,6 +164,21 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
       <li class="step"><b>Abre Minecraft con Fabric</b><span>Elige el perfil de Fabric en el launcher y pulsa Jugar.</span></li>
       <li class="step"><b>Añade el servidor</b><span>En Multijugador, pulsa Añadir servidor y pega <code>rails-complies.tun.ply.gg</code>.</span></li>
     </ol>
+  </section>
+
+  <section id="estado">
+    <h2>Estado del servidor</h2>
+    <button class="btn" id="stToggle" type="button" aria-expanded="false" aria-controls="stPanel">Ver estado y jugadores</button>
+    <div class="st" id="stPanel" hidden style="margin-top:18px" aria-live="polite">
+      <p class="line" id="stLine"><span class="dot"></span><span id="stTxt">Comprobando...</span></p>
+      <h3>Conectados ahora</h3>
+      <ul class="plist" id="stOn"></ul>
+      <p class="pnote" id="stOnNote" hidden></p>
+      <h3>Vistos recientemente (desconectados)</h3>
+      <ul class="plist offl" id="stOff"></ul>
+      <p class="pnote" id="stOffNote">Aún no hay jugadores registrados.</p>
+      <p class="pnote" style="font-size:14px">La lista de desconectados solo incluye jugadores que esta página vio conectados en este navegador. El servidor no entrega una lista de quién está desconectado.</p>
+    </div>
   </section>
 
   <section>
@@ -199,6 +229,78 @@ footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
       done(document.execCommand("copy"));
     }catch(e){done(false)}
   }
+})();
+(function(){
+  var ip="rails-complies.tun.ply.gg",KEY="cpland_seen";
+  var tg=document.getElementById("stToggle"),topb=document.getElementById("stOpenTop"),panel=document.getElementById("stPanel");
+  var line=document.getElementById("stLine"),txt=document.getElementById("stTxt");
+  var ulOn=document.getElementById("stOn"),noteOn=document.getElementById("stOnNote");
+  var ulOff=document.getElementById("stOff"),noteOff=document.getElementById("stOffNote");
+  var timer=null;
+  function loadSeen(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){return {}}}
+  function saveSeen(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+  function ago(ts){
+    var m=Math.round((Date.now()-ts)/60000);
+    if(m<2)return "hace un momento";
+    if(m<60)return "hace "+m+" min";
+    var h=Math.round(m/60);
+    if(h<24)return "hace "+h+" h";
+    return "hace "+Math.round(h/24)+" d";
+  }
+  function head(n){var i=new Image();i.alt="";i.width=32;i.height=32;i.src="https://mc-heads.net/avatar/"+encodeURIComponent(n)+"/32";i.onerror=function(){i.style.visibility="hidden"};return i}
+  function fill(ul,items){
+    ul.innerHTML="";
+    items.forEach(function(it){
+      var li=document.createElement("li"),d=document.createElement("div");
+      d.appendChild(document.createTextNode(it.name));
+      if(it.sub){var sm=document.createElement("small");sm.textContent=it.sub;d.appendChild(sm)}
+      li.appendChild(head(it.name));li.appendChild(d);ul.appendChild(li);
+    });
+  }
+  function render(online,n,m,names){
+    line.className="line "+(online?"on":"off");
+    var seen=loadSeen(),now=Date.now();
+    if(!online){
+      txt.textContent="Servidor apagado";
+      fill(ulOn,[]);noteOn.textContent="El servidor está apagado en este momento.";noteOn.hidden=false;
+    }else{
+      txt.textContent="En línea · "+n+" / "+m+(n===1?" jugador":" jugadores");
+      names.forEach(function(x){seen[x]=now});
+      saveSeen(seen);
+      fill(ulOn,names.map(function(x){return {name:x}}));
+      if(names.length){noteOn.hidden=true}
+      else{noteOn.textContent=n===0?"No hay nadie conectado ahora.":"Hay "+n+" conectado"+(n===1?"":"s")+", pero el servidor no comparte los nombres.";noteOn.hidden=false}
+    }
+    var cur={};names.forEach(function(x){cur[x]=1});
+    var off=Object.keys(seen).filter(function(x){return !cur[x]}).sort(function(a,b){return seen[b]-seen[a]}).slice(0,12)
+      .map(function(x){return {name:x,sub:ago(seen[x])}});
+    fill(ulOff,off);
+    noteOff.hidden=off.length>0;
+  }
+  function get(url,pick){
+    return fetch(url).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(d){
+      if(d&&d.online)return {online:true,n:d.players.online,m:d.players.max,names:(d.players.list||[]).map(pick)};
+      return {online:false};
+    });
+  }
+  function check(){
+    get("https://api.mcstatus.io/v2/status/java/"+ip,function(p){return p.name_clean})
+    .catch(function(){return get("https://api.mcsrvstat.us/3/"+ip,function(p){return p.name})})
+    .then(function(r){render(r.online,r.n,r.m,r.names||[])})
+    .catch(function(){line.className="line";txt.textContent="No se pudo comprobar el estado. Abre la página en tu navegador."});
+  }
+  function setOpen(o){
+    panel.hidden=!o;
+    tg.textContent=o?"Ocultar estado":"Ver estado y jugadores";
+    tg.setAttribute("aria-expanded",o?"true":"false");
+    clearInterval(timer);
+    if(o){txt.textContent="Comprobando...";check();timer=setInterval(check,60000)}
+  }
+  tg.addEventListener("click",function(){setOpen(panel.hidden)});
+  topb.addEventListener("click",function(){
+    if(panel.hidden)setOpen(true);
+    document.getElementById("estado").scrollIntoView({behavior:"smooth",block:"start"});
+  });
 })();
 (function(){
   var form=document.getElementById("sugForm"),tg=document.getElementById("sugToggle"),top=document.getElementById("sugOpenTop");
